@@ -23,22 +23,22 @@ public class PacketManager implements IMediaPacketManager {
 	 * Byteデータを確認して、利用するManagerを自動選択します。
 	 */
 	@Override
-	public List<IMediaPacket> getPackets(byte[] data) {
+	public List<IMediaPacket> getPackets(ByteBuffer data) {
 		// packetManagerがすでに生成済みなら、そっちにデータを受け流す
 		if(packetManager != null) {
 			return packetManager.getPackets(data);
 		}
 		if(buffer != null) {
-			int length = buffer.remaining() + data.length;
+			int length = buffer.remaining() + data.remaining();
 			ByteBuffer newBuffer = ByteBuffer.allocate(length);
 			newBuffer.put(buffer);
 			buffer = newBuffer;
+			buffer.put(data);
+			buffer.flip();
 		}
 		else {
-			buffer = ByteBuffer.allocate(data.length);
+			buffer = data;
 		}
-		buffer.put(data);
-		buffer.flip();
 		// 応答がnullになると呼び出し元でこまることになる。(かならず、listの形で応答することにしている。)
 		List<IMediaPacket> result = new ArrayList<IMediaPacket>();
 		// 保持データ量が3バイト以上の場合は処理を実施する。
@@ -67,10 +67,7 @@ public class PacketManager implements IMediaPacketManager {
 			}
 			// 持っているデータをpacketManagerに渡す。
 			buffer.rewind();
-			readByte = new byte[buffer.remaining()];
-			buffer.get(readByte);
-			buffer = null; // もう必要ないので、開放しておく。
-			return packetManager.getPackets(readByte);
+			return packetManager.getPackets(buffer);
 		}
 		return result;
 	}

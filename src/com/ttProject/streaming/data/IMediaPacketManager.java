@@ -1,5 +1,6 @@
 package com.ttProject.streaming.data;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ public interface IMediaPacketManager {
 	 * 書き込みReadyになったパケットデータを応答します。
 	 * @param data
 	 */
-	public List<IMediaPacket> getPackets(byte[] data);
+	public List<IMediaPacket> getPackets(ByteBuffer buffer);
 	/**
 	 * 現在処理中のデータを取得
 	 * @return

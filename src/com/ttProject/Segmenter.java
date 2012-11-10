@@ -2,7 +2,10 @@ package com.ttProject;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 
 import org.apache.commons.cli.BasicParser;
@@ -105,40 +108,35 @@ public class Segmenter {
 	 */
 	private void execute() throws Exception {
 		// 必要なファイルを読みこんでMediaManagerに処理を依頼する。
-		InputStream source = null;
+		ReadableByteChannel source;
 		if(getSourceFile() == null) {
 			// stdInから処理を実行する。
-			source = System.in;
+			source = Channels.newChannel(System.in);
 		}
 		else {
 			// ファイルから処理を実行する。
-			source = new FileInputStream(getSourceFile());
+			source = new FileInputStream(getSourceFile()).getChannel();
 		}
 		int increment = 0;
-		int length;
-		byte[] data;
 		PacketManager manager = new PacketManager();
 		M3u8Manager m3u8Manager = null;
 		if(getM3u8File() != null) {
 			m3u8Manager = new M3u8Manager();
 		}
 		// stdinの場合はavailableが0の場合があるみたいです。
-		while(source.available() > 0 || getSourceFile() == null) {
-			if(source.available() == 0) {
-				// 1秒待機してから、次の処理にまわします。
+		while(source.isOpen()) {
+			ByteBuffer buffer = ByteBuffer.allocate(65536);
+			source.read(buffer);
+			buffer.flip();
+			if(buffer.remaining() == 0) {
+				if(source instanceof FileChannel) {
+					// fileChannelで残りが0バイトだったら、処理がおわってる
+					break;
+				}
 				Thread.sleep(1000);
 				continue;
 			}
-			if(getSourceFile() == null) {
-				System.out.println("avail:" + source.available());
-				length = source.available();
-			}
-			else {
-				length = 1024 > source.available() ? source.available() : 1024;
-			}
-			data = new byte[length];
-			source.read(data);
-			List<IMediaPacket> packets = manager.getPackets(data);
+			List<IMediaPacket> packets = manager.getPackets(buffer);
 			for(IMediaPacket packet : packets) {
 				increment ++;
 				String targetFile = filePrefix.getAbsolutePath() + "_" + increment + manager.getExt();

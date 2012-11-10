@@ -21,13 +21,13 @@ public abstract class MediaPacket implements IMediaPacket {
 	 */
 	protected ByteBuffer getBuffer(int size) {
 		if(buffer == null) { // なかったら新規作成
-			buffer = ByteBuffer.allocate(size);
+			buffer = ByteBuffer.allocate(size + 65536);
 		}
 		if(buffer.remaining() >= size) { // 容量の残りが必要量ある場合はそのまま応答
 			return buffer;
 		}
 		// 必要量ないので、新規にバッファを再生成
-		ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() + size); 
+		ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() + size + 65536); 
 		buffer.flip();
 		newBuffer.put(buffer);
 		buffer = newBuffer;

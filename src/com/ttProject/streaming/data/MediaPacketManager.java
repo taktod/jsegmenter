@@ -19,18 +19,18 @@ public abstract class MediaPacketManager implements IMediaPacketManager {
 	 * パケットの解析処理
 	 */
 	@Override
-	public List<IMediaPacket> getPackets(byte[] data) {
+	public List<IMediaPacket> getPackets(ByteBuffer data) {
 		if(buffer != null) {
-			int length = buffer.remaining() + data.length;
+			int length = buffer.remaining() + data.remaining();
 			ByteBuffer newBuffer = ByteBuffer.allocate(length);
 			newBuffer.put(buffer);
 			buffer = newBuffer;
+			buffer.put(data);
+			buffer.flip();
 		}
 		else {
-			buffer = ByteBuffer.allocate(data.length);
+			buffer = data;
 		}
-		buffer.put(data);
-		buffer.flip();
 		List<IMediaPacket> result = new ArrayList<IMediaPacket>();
 		while(buffer.remaining() > 0) {
 			IMediaPacket packet = analizePacket(buffer);

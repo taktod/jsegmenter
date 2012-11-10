@@ -1,0 +1,1 @@
+java -Xmx512m -cp lib/commons-cli-1.2.jar:lib/jsegmenter.jar com.ttProject.Segmenter $*

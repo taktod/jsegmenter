@@ -27,11 +27,9 @@ public class HlsMediaPacket extends HlsPacket {
 			if(manager.isPcrId(pid)) {
 				// mediaIDだったら解析にまわす
 				analizePcrPacket(buffer);
-			}
-			if(manager.isH264Id(pid)) {
-				// h.264のパケットの場合
-				// キーパケットであるか確認する。
-				if(isH264KeyPacket(buffer) && getBufferSize() > 0) {
+				// PCRであるかの確認を実施し、PCRなら、その分割可能か確認する。
+				// isSplittablePacketでは同じ処理を複数やってるみたいな感じになっているので、いつかなおしておきたい。
+				if(isSplittablePacket(buffer) && getBufferSize() > 0) {
 					// バッファがある状態でキーパケットがきたら。次のパケットに進む。
 					return true;
 				}
@@ -85,18 +83,20 @@ public class HlsMediaPacket extends HlsPacket {
 		buffer.position(position);
 	}
 	/**
-	 * h.264のキーパケットであるか調べる
+	 * 分割可能なmpegtsファイルであるか確認する。
 	 * @param buffer
 	 * @return
 	 */
-	private boolean isH264KeyPacket(ByteBuffer buffer) {
+	private boolean isSplittablePacket(ByteBuffer buffer) {
 		int position = buffer.position();
+		int pid;
 		byte[] header = new byte[4];
 		buffer.get(header);
 		// syncByte
 		if(header[0] != 0x47) {
 			throw new RuntimeException("syncByteがおかしいです。");
 		}
+		pid = ((header[1] & 0x1F) << 8) + (header[2] & 0xFF);
 		int adaptationFlg = (header[3] & 0x20) >>> 5;
 		if(adaptationFlg == 1) { // adaptationFlgがたっている場合は、追加情報に時間情報があるかもしれない
 			// adaptationFieldについて解析する。
@@ -107,7 +107,13 @@ public class HlsMediaPacket extends HlsPacket {
 				buffer.get(data);
 				int randomAccessIndicator = (data[pos] & 0x40) >>> 6;
 				int pcrFlg = (data[pos] & 0x10) >>> 4;
-				if(pcrFlg == 1 && randomAccessIndicator == 1) { // pcrフラグがたっている場合は、時間の情報がある
+				boolean isH264 = manager.isH264Id(pid);
+				if(pcrFlg == 1) { // pcrフラグがたっている場合は、時間の情報がある
+					if(isH264 && randomAccessIndicator == 0) {
+						// h.264の場合はrandomAccessIndicatorを調べる必要がある。
+						buffer.position(position);
+						return false;
+					}
 					// adaptationField後のデータを読みこんでPESパケットヘッダであるか確認する。
 					data = new byte[3];
 					buffer.get(data);

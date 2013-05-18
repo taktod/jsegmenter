@@ -12,6 +12,9 @@ twitter: http://twitter.com/taktod
 
 java 1.6以降とmaven3が必要です。
 maven2を使う場合はpom.xmlの内容を修正してください。
+packageコマンドを実行するとtargetの中にtarget/jsegmenter/jsegmenter.shができあがるので、実行してください。
+$ mvn package
+あとは元のjsegmenterとほぼ同じです。
 
 肝は次のとおりです。
 

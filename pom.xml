@@ -33,11 +33,23 @@
       <groupId>com.ttProject</groupId>
       <artifactId>myLib.packet.mpegts</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.ttProject</groupId>
       <artifactId>myLib.packet.mp3</artifactId>
       <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>
@@ -47,12 +59,27 @@
     <dependency>
       <groupId>com.ttProject</groupId>
       <artifactId>myLib.channels</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.ttProject</groupId>
       <artifactId>myLib.segment</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ttProject</groupId>
+      <artifactId>myLib.chunk.mpegts</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ttProject</groupId>
+      <artifactId>myLib.chunk.mp3</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ttProject</groupId>
+      <artifactId>myLib.chunk.aac</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

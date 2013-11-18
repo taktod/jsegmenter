@@ -192,7 +192,7 @@ public class JSegmenter {
 						IMediaChunk chunk = chunkManager.getChunk(unit);
 						if(chunk != null) {
 							increment = writeChunk(chunkManager, increment,
-									m3u8Manager, chunk, false);
+									m3u8Manager, chunk);
 						}
 					}
 				}
@@ -201,12 +201,17 @@ public class JSegmenter {
 		// 残っているデータがある場合は、処置しないとだめ。
 		IMediaChunk chunk = chunkManager.close();
 		if(chunk != null) {
-			writeChunk(chunkManager, increment, m3u8Manager, chunk, true);
+			System.out.println("最終chunkがのこってた。");
+			writeChunk(chunkManager, increment, m3u8Manager, chunk);
+		}
+		// 終端を書き込んでおく
+		if(m3u8File != null) {
+			m3u8Manager.writeEnd();
 		}
 		System.out.println("完了しました");
 	}
 	private int writeChunk(IMediaChunkManager chunkManager, int increment,
-			M3u8Manager m3u8Manager, IMediaChunk chunk, boolean end)
+			M3u8Manager m3u8Manager, IMediaChunk chunk)
 			throws FileNotFoundException, IOException {
 		// chunkができているので、あとはそれを書き出すだけ。
 		increment ++;
@@ -232,7 +237,7 @@ public class JSegmenter {
 					targetHttp,
 					chunk.getDuration(),
 					increment,
-					end
+					false
 			);
 		}
 		return increment;
